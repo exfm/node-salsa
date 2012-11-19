@@ -29,7 +29,7 @@ module.exports.create = function(path, details){
             'package.json': "package.json.hbs",
             'README.md': "README.md.hbs",
             'index.js': "index.js",
-            'server.js': "server.js",
+            'server.js': "server.js.hbs",
             'grunt.js': "grunt.js"
         };
         renderFiles(path, topLevels, details, next);
@@ -46,7 +46,9 @@ module.exports.create = function(path, details){
     // Compile the libraries
         var libFiles = {
             'lib/app.js': "lib/app.js.hbs",
-            'lib/model.js': "lib/model.js.hbs"
+            'lib/model.js': "lib/model.js.hbs",
+            'lib/log.js': "lib/log.js",
+            'lib/common.js': "lib/common.js"
         };
         renderFiles(path, libFiles, details, next);
     }).then(function(next){

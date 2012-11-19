@@ -8,8 +8,6 @@ var {{formalName}} = require("./model"),
     getConfig = require("junto"),
     util = require("util"),
     _ = require("underscore"),
-    forms = require('./forms'),
-    form = forms.form,
     log = require('./log'),
     nurse = require('nurse'),
     winston = require('winston'),
@@ -101,7 +99,7 @@ app.post("/", function(req, res, next){
     {{formalName}}.create(req.body).then(function({{name}}){
         log.debug('Created {{name}}', {{name}});
         if(!{{name}}){
-            return next(new ApiError(400, "Song with url " + req.body.url + " not created."));
+            return next(new ApiError(400, "{{formalName}} with title " + req.body.title + " not created."));
         }
         return res.send({{name}});
     }, throwRejection(next));
@@ -110,7 +108,7 @@ app.post("/", function(req, res, next){
 //
 app.get("/:id", function(req, res, next){
 
-    id = req.params.id;
+    var id = req.params.id;
 
     {{formalName}}.getById(Number(id)).then(function({{name}}){
         req.{{name}} = {{name}};

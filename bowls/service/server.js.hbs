@@ -1,7 +1,7 @@
 "use strict";
 
-var Row = app.model,
-    app = require('./'),
+var app = require('./'),
+    {{formalName}} = app.model,
     http = require('http'),
     nconf = require('nconf'),
     winston = require('winston'),
@@ -36,7 +36,7 @@ getConfig(nconf.get("NODE_ENV")).then(function(config){
         nconf.get("table_prefix"));
 
     if(nconf.get('MAMBO_BACKEND')){
-        Row.createAll().then(function(){
+        {{formalName}}.createAll().then(function(){
             console.log('All tables created in magneto');
         });
     }
