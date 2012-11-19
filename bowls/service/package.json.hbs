@@ -1,0 +1,61 @@
+{
+    "author": "{{authorName}} <{{authorEmail}}>",
+    "name": "{{name}}",
+    "description": "{{description}}",
+    "version": "0.0.0",
+    "homepage": "{{githubUrl}}",
+    "repository": {
+        "type": "git",
+        "url": "{{repoUrl}}"
+    },
+    "dependencies": {
+        "express": "3.0.x",
+        "dynamo": "git://github.com/exfm/dynamo.git",
+        "sequence": "2.2.1",
+        "when": "git://github.com/exfm/when.git",
+        "winston": "0.6.1",
+        "optimist": "0.3.4"
+    },
+    "devDependencies": {
+        "grunt-mocha": "0.1.3",
+        "mocha": "1.4.1",
+        "chai": "1.2.0",
+        "magneto": "0.0.6",
+        "bunyan": "0.13.5",
+        "superagent": "0.9.0"
+    },
+    "optionalDependencies": {},
+    "engines": {
+        "node": "*"
+    },
+    "cloudformation": {
+        "hostedZone": "ex.fm.",
+        "bootstrapServerUrl": "ops.ex.fm",
+        "scaleUpThreshold": 70,
+        "scaleDownThreshold": 70,
+        "pricing": "On Demand",
+        "bid": null,
+        "evalPeriod": 300,
+        "numEvalPeriods": 2,
+        "minInstances": 1,
+        "maxInstances": 4,
+        "incrementBy": 1,
+        "availabilityZones": [
+            "us-east-1e"
+        ],
+        "instanceType": "t1.micro",
+        "amiId": "ami-64f7480d"
+    },
+    "model": [
+        {
+            "alias": "row",
+            "table": "Row",
+            "hashName": "hash",
+            "hashType": "S",
+            "rangeName": "created",
+            "rangeType": "N",
+            "read": 10,
+            "write": 5
+        }
+    ]
+}

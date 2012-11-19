@@ -1,0 +1,26 @@
+{
+  "name": "salsa",
+  "version": "0.0.2",
+  "description": "Tooling helper to boostrap projects",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/exfm/node-salsa.git"
+  },
+  "bin": {
+    "salsa": "./bin/salsa"
+  },
+  "author": "Lucas Hrabovsky",
+  "license": "MIT",
+  "dependencies":{
+    "sequence": "2.2.1",
+    "when": "git://github.com/exfm/when.git",
+    "commander": "1.0.4",
+    "hbs": "1.0.5",
+    "superagent": "0.9.0",
+    "shelljs": "0.0.6"
+  }
+}

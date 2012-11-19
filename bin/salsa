@@ -1,0 +1,171 @@
+#!/usr/bin/env node
+"use strict";
+
+var program = require("commander"),
+    sequence = require("sequence"),
+    when = require("when"),
+    salsa = require("../");
+
+program
+    .version("0.0.1");
+
+program
+    .command("list")
+    .description("List all available bowls")
+    .action(function(){
+        salsa.getBowlList().then(function(bowls){
+            console.log("Available bowl templates:");
+            Object.keys(bowls).forEach(function(name){
+                console.log(" - " + name + ": " + bowls[name].description);
+            });
+        });
+   });
+
+program
+    .command("create <tpl> <dir>")
+    .description("Create a new bowl")
+    .action(function(tpl, dir){
+        var details = {
+            'makePrivate': false
+        },
+            repoUrl,
+            githubUrl,
+            bowl = salsa.getBowl(tpl),
+            sourceRepo,
+            filesToAdd = {},
+            name = dir;
+        sequence().then(function(next){
+            if(!salsa.loadConfig()){
+                console.log("Unable to read JSON-formatted configuration file .salsarc.  \nMinimum requirement for the config is an \"auth_token\" Github oauth token.");
+                process.exit(1);
+            }
+            next();
+        }).then(function(next){
+            var promptString;
+            if(salsa.config.organization) {
+                promptString = "Organization (" + salsa.config.organization +
+                    "): ";
+            }
+            else {
+                promptString = "Organization: ";
+            }
+            program.prompt(promptString, next);
+        }).then(function(next, org){
+            if(!org && !salsa.config.organization){
+                console.log("Organization is a required field.");
+                process.exit(1);
+            }
+            details.organization = org || salsa.config.organization;
+            next();
+        }).then(function(next){
+            program.prompt("Description: ", next);
+        }).then(function(next, description){
+            details.description = description || "";
+            next();
+        }).then(function(next){
+            if(name.indexOf("/") !== -1){
+                var parts = name.split("/");
+                name = parts[parts.length - 1];
+            }
+            program.prompt("Repo Name (" + name + "): ", next);
+        }).then(function(next, n){
+            details.name = n || name;
+            next();
+        }).then(function(next){
+            repoUrl = "git://github.com/" + details.organization + "/" +
+                details.name + ".git";
+            program.prompt("Repo URL (" + repoUrl + "): ", next);
+        }).then(function(next, url){
+            details.repoUrl = url || repoUrl;
+            next();
+        }).then(function(next){
+            githubUrl = repoUrl.replace("git://", "http://").replace(".git",
+                "");
+            program.prompt("Github URL (" + githubUrl + "): ", next);
+        }).then(function(next, url){
+            details.githubUrl = url || githubUrl;
+            next();
+        }).then(function(next){
+            program.prompt("Make repo private? (yes/no) ",
+                next);
+        }).then(function(next, makePrivate){
+            if (makePrivate == "yes"){
+                details.makePrivate = true;
+            }
+            next();
+        }).then(function(next){
+            program.prompt("Copy webhooks from an existing repo? (yes/no) ",
+                next);
+        }).then(function(next, copyWebhooks){
+            if (copyWebhooks == "yes"){
+                return processWebhookUrl().then(function(hookUrl){
+                    sourceRepo = hookUrl;
+                    next();
+                });
+            }
+            next();
+        }).then(function(next){
+            var promptString;
+            if (salsa.config.author_name) {
+                promptString = "Author Name (" + salsa.config.author_name +
+                    "): ";
+            }
+            else {
+                promptString = "Author Name: ";
+            }
+            program.prompt(promptString, next);
+        }).then(function(next, name){
+            details.authorName = name || salsa.config.author_name || "";
+            next();
+        }).then(function(next){
+            var promptString;
+            if (salsa.config.author_email) {
+                promptString = "Author Email (" + salsa.config.author_email +
+                    "): ";
+            }
+            else {
+                promptString = "Author Email: ";
+            }
+            program.prompt(promptString, next);
+        }).then(function(next, email){
+            details.authorEmail = email || salsa.config.author_email || "";
+            next();
+        }).then(function(next){
+            console.log("filling bowl");
+            bowl.create(dir, details).then(next);
+        }).then(function(next){
+            salsa.initializeRepo(dir, details.name, details.makePrivate, githubUrl,
+                bowl.listOfFiles).then(next);
+        }).then(function(next){
+            if (sourceRepo) {
+                return salsa.copyWebhooks(sourceRepo, githubUrl).then(next);
+            }
+            next();
+        }).then(function(next){
+            console.log("eating chips");
+            next();
+        }).then(function(next){
+            process.stdin.destroy();
+        });
+   });
+
+function processWebhookUrl() {
+    var d = when.defer();
+    sequence().then(function(next){
+        var promptString;
+        if (salsa.config.webhook_url) {
+            promptString = "Existing repo URL to copy webhooks from (" +
+                salsa.config.webhook_url + "): ";
+        }
+        else {
+            promptString = "Existing repo URL to copy webhooks from: ";
+        }
+        program.prompt(promptString, next);
+    }).then(function(next, webhookUrl){
+        var hookUrl = webhookUrl || salsa.config.webhook_url || "";
+        d.resolve(hookUrl);
+    });
+    return d.promise;
+}
+
+program.parse(process.argv);
