@@ -5,12 +5,13 @@ var fs = require("fs"),
     hbs = require("hbs"),
     sequence = require("sequence");
 
-var directories = ["bin", "lib", "lib/models", "lib/app", "test"];
+var directories = ["logs", "lib", "test"];
 
 module.exports.listOfFiles = [];
 
 module.exports.create = function(path, details){
     var d = when.defer();
+    details.formalName = details.name.charAt(0).toUpperCase() + details.name.slice(1);
     sequence(this).then(function(next){
         // Create the main directory
         createDir(path).then(next);
@@ -28,32 +29,26 @@ module.exports.create = function(path, details){
             'package.json': "package.json.hbs",
             'README.md': "README.md.hbs",
             'index.js': "index.js",
+            'server.js': "server.js.hbs",
             'grunt.js': "grunt.js"
         };
         renderFiles(path, topLevels, details, next);
     }).then(function(next){
         // Compile the test files
-        var testName = "test/" + details.name + ".test.js",
-            testFiles = {
-                'test/helpers.js': "test/helpers.js",
+        var testFiles = {
+                'test/helpers.js': "test/helpers.js.hbs",
                 'test/mocha.opts': "test/mocha.opts",
-                'test/models.test.js': "test/models.test.js",
-                'test/index.html': "test/harness.html.hbs"
+                'test/models.test.js': "test/models.test.js.hbs",
+                'test/app.test.js': "test/app.test.js.hbs"
             };
-        testFiles[testName] = "test/app.test.js";
         renderFiles(path, testFiles, details, next);
-    }).then(function(next){
-        // Compile the executables
-        var binName = "bin/" + details.name,
-            binFiles = {
-            };
-        binFiles[binName] = "bin/service_name.hbs";
-        renderFiles(path, binFiles, details, next);
     }).then(function(next){
     // Compile the libraries
         var libFiles = {
-            'lib/app/index.js': "lib/app/index.js",
-            'lib/models/index.js': "lib/models/index.js"
+            'lib/app.js': "lib/app.js.hbs",
+            'lib/model.js': "lib/model.js.hbs",
+            'lib/log.js': "lib/log.js",
+            'lib/common.js': "lib/common.js"
         };
         renderFiles(path, libFiles, details, next);
     }).then(function(next){

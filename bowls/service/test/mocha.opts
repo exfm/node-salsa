@@ -1,2 +1,2 @@
 --reporter spec
---timeout 500
+--timeout 2000

@@ -1,0 +1,111 @@
+ "use strict";
+
+var mambo = require("mambo"),
+    Model = mambo.Model,
+    Schema = mambo.Schema,
+    StringField = mambo.StringField,
+    NumberField = mambo.NumberField,
+    JSONField = mambo.JSONField,
+    DateField = mambo.DateField,
+    BooleanField = mambo.BooleanField,
+    StringSetField = mambo.StringSetField,
+    NumberSetField = mambo.NumberSetField,
+
+    sequence = require("sequence"),
+    when = require("when"),
+    _ = require("underscore"),
+    nconf = require("nconf"),
+    request = require("superagent"),
+    log = require("./log"),
+
+    common = require("./common"),
+    Options = common.Options;
+
+function makeId(){
+    return parseInt(Math.random() * 100000000000, 10);
+}
+
+var {{name}}Schema = new Schema('{{formalName}}', '{{name}}', 'id', {
+    'id': NumberField,
+    'created': DateField,
+    'title': StringField
+});
+
+var {{formalName}} = new Model({{name}}Schema);
+
+{{formalName}}.getById = function(id){
+    return this.get("{{name}}", id);
+};
+
+{{formalName}}.create = function(opts){
+    opts = new Options((opts || {}));
+
+    var {{name}},
+        q,
+        self = this,
+        d = when.defer(),
+        id = opts.get('id', null),
+        title = opts.get('title', null),
+        created = opts.get('created', function(){return new Date();});
+
+    if(created.constructor !== Date){
+        created = new Date(created);
+    }
+
+    function createIt(){
+        {{name}} = {
+            'id': Number(id),
+            'title': title,
+            'created': created
+        };
+
+        q = self.insert('{{name}}', id)
+            .set({{name}});
+
+        q.commit().then(function(){
+            d.resolve({{name}});
+        }, d.reject);
+    }
+
+    if (id === null) {
+        id = makeId();
+    }
+    createIt();
+    return d.promise;
+};
+
+{{formalName}}.destroy = function(id){
+    var d = when.defer();
+    this.get('{{name}}', id).then(function({{name}}){
+        if(!{{name}}){
+            return d.resolve(false);
+        }
+        this.batch()
+            .remove('{{name}}', id)
+            .commit()
+            .then(function(){d.resolve(true);}, d.reject);
+    }.bind(this), d.reject);
+    return d.promise;
+};
+
+// {{formalName}}.applyUpdate(1, {
+//     'sets': {
+//         'title': 'Silence in a Sweater'
+//     }
+// });
+{{formalName}}.applyUpdate = function(id, data){
+    var d = when.defer(),
+        q = this.update('{{name}}', id)
+            .returnAll();
+    if(!data.sets){
+        data.sets = {};
+    }
+    data.sets.version = Date.now();
+    q.set(data.sets);
+    q.commit().then(function({{name}}){
+        d.resolve({{name}});
+    });
+    return d.promise;
+};
+
+module.exports = exports = {{formalName}};
