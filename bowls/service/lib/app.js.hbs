@@ -102,7 +102,7 @@ app.post("/", function(req, res, next){
             return next(new ApiError(400, "{{formalName}} with title " + req.body.title + " not created."));
         }
         return res.send({{name}});
-    }, throwRejection(next));
+    }, throwRejection);
 });
 
 //
@@ -111,9 +111,8 @@ app.get("/:id", function(req, res, next){
     var id = req.params.id;
 
     {{formalName}}.getById(Number(id)).then(function({{name}}){
-        req.{{name}} = {{name}};
         if(!_.isEmpty({{name}})){
-            return next();
+            return res.send({{name}});
         }
         return next(new ApiError(404, "Unknown {{name}} id: " + id + "."));
     }, function(err){

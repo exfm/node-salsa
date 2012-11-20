@@ -5,7 +5,7 @@ var fs = require("fs"),
     hbs = require("hbs"),
     sequence = require("sequence");
 
-var directories = ["lib", "test"];
+var directories = ["logs", "lib", "test"];
 
 module.exports.listOfFiles = [];
 

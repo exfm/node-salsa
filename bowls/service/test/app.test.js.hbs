@@ -54,8 +54,9 @@ describe("API", function(){
     describe("get", function(){
         var {{name}};
         before(function(done){
-            helpers.create{{formalName}}.then(function(data){
+            helpers.create{{formalName}}().then(function(data){
                 {{name}} = data;
+                done();
             });
         });
         it("should get a {{name}} by id", function(done){
