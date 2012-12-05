@@ -134,14 +134,12 @@ program
             console.log("filling bowl");
             bowl.create(dir, details).then(next);
         }).then(function(next){
-            // salsa.initializeRepo(dir, details.name, details.makePrivate, githubUrl,
-            //     bowl.listOfFiles).then(next);
-            next();
+            salsa.initializeRepo(dir, details.name, details.makePrivate, githubUrl,
+                bowl.listOfFiles).then(next);
         }).then(function(next){
-            // if (sourceRepo) {
-            //     return salsa.copyWebhooks(sourceRepo, githubUrl).then(next);
-            // }
-            next();
+            if (sourceRepo) {
+                return salsa.copyWebhooks(sourceRepo, githubUrl).then(next);
+            }
         }).then(function(next){
             console.log("eating chips");
             next();
